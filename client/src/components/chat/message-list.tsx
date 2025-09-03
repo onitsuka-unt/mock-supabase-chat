@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import type { Message } from '../../types/message';
 
 interface MessageListProps {
@@ -11,6 +12,12 @@ export default function MessageList({
   loading,
   error,
 }: MessageListProps) {
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // メッセージが更新されるたびに最下部にスクロール
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
   if (loading) {
     return (
       <div className='flex items-center justify-center h-full'>
@@ -36,7 +43,7 @@ export default function MessageList({
   }
 
   return (
-    <div className='flex flex-col space-y-4 p-4 overflow-y-auto'>
+    <div className='grid gap-y-4 py-4'>
       {messages.map((message) => (
         <div key={message.id} className='bg-gray-100 rounded-lg p-3'>
           <div className='flex items-center justify-between mb-2'>
@@ -50,6 +57,7 @@ export default function MessageList({
           <div className='text-gray-800'>{message.content}</div>
         </div>
       ))}
+      <div ref={messagesEndRef} />
     </div>
   );
 }
