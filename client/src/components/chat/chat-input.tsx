@@ -1,10 +1,30 @@
 import { useState } from 'react';
+import { supabase } from '../../lib/supabase';
 
 export default function ChatInput() {
   const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!message.trim()) return;
+    setLoading(true);
+
+    try {
+      // Supabase側へメッセージを保存
+      const { error } = await supabase.from('messages').insert({
+        content: message.trim(),
+      });
+
+      if (error) throw error;
+
+      setMessage('');
+    } catch (err) {
+      console.error('メッセージ送信エラー:', err);
+      alert('メッセージの送信に失敗しました');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -22,9 +42,10 @@ export default function ChatInput() {
           />
           <button
             type='submit'
+            disabled={loading || !message.trim()}
             className='px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed'
           >
-            送信
+            {loading ? '送信中...' : '送信'}
           </button>
         </div>
       </form>
