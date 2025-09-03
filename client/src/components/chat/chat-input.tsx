@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { supabase } from '../../lib/supabase';
 
 export default function ChatInput() {
   const [message, setMessage] = useState('');
@@ -11,17 +10,26 @@ export default function ChatInput() {
     setLoading(true);
 
     try {
-      // Supabase側へメッセージを保存
-      const { error } = await supabase.from('messages').insert({
-        content: message.trim(),
+      // Hono API経由でメッセージを送信
+      const response = await fetch('/api/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: message.trim(),
+        }),
       });
 
-      if (error) throw error;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'メッセージの送信に失敗しました');
+      }
 
       setMessage('');
     } catch (err) {
       console.error('メッセージ送信エラー:', err);
-      alert('メッセージの送信に失敗しました');
+      alert(err instanceof Error ? err.message : 'メッセージの送信に失敗しました');
     } finally {
       setLoading(false);
     }
