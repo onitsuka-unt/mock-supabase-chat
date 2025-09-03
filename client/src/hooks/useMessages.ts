@@ -2,29 +2,30 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Message } from '../types/message';
 
-export function useMessages(roomId = 'general') {
+export function useMessages() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // 初期メッセージの取得
-    async function fetchMessages() {
+    const fetchMessages = async () => {
       try {
         const { data, error } = await supabase
           .from('messages')
           .select('*')
-          .eq('room_id', roomId)
           .order('created_at', { ascending: true });
 
         if (error) throw error;
         setMessages(data || []);
       } catch (err) {
-        setError(err instanceof Error ? err.message : '不明なエラーが発生しました');
+        setError(
+          err instanceof Error ? err.message : '不明なエラーが発生しました'
+        );
       } finally {
         setLoading(false);
       }
-    }
+    };
 
     fetchMessages();
 
@@ -37,7 +38,6 @@ export function useMessages(roomId = 'general') {
           event: 'INSERT',
           schema: 'public',
           table: 'messages',
-          filter: `room_id=eq.${roomId}`,
         },
         (payload) => {
           const newMessage = payload.new as Message;
@@ -49,7 +49,7 @@ export function useMessages(roomId = 'general') {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [roomId]);
+  }, []);
 
   return { messages, loading, error };
 }

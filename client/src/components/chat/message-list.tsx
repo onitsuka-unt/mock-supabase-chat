@@ -6,7 +6,11 @@ interface MessageListProps {
   error: string | null;
 }
 
-export default function MessageList({ messages, loading, error }: MessageListProps) {
+export default function MessageList({
+  messages,
+  loading,
+  error,
+}: MessageListProps) {
   if (loading) {
     return (
       <div className='flex items-center justify-center h-full'>
@@ -36,7 +40,6 @@ export default function MessageList({ messages, loading, error }: MessageListPro
       {messages.map((message) => (
         <div key={message.id} className='bg-gray-100 rounded-lg p-3'>
           <div className='flex items-center justify-between mb-2'>
-            <span className='font-semibold text-blue-600'>{message.user_id}</span>
             <span className='text-xs text-gray-500'>
               {new Date(message.created_at).toLocaleTimeString('ja-JP', {
                 hour: '2-digit',
