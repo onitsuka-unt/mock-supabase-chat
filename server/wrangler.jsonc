@@ -6,9 +6,10 @@
   "compatibility_flags": [
     "nodejs_compat"
   ],
-  // "vars": {
-  //   "MY_VAR": "my-variable"
-  // },
+  "vars": {
+    "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpweWxhdWJscnFhZ3NjdGpwcmVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYyNzQ3OTQsImV4cCI6MjA3MTg1MDc5NH0.eDJUS11i5OuaKeZGPIL2YfsrTq7VZ4rN3FSISFBpH7g",
+    "SUPABASE_URL": "https://jpylaublrqagsctjprek.supabase.co"
+  },
   // "kv_namespaces": [
   //   {
   //     "binding": "MY_KV_NAMESPACE",
