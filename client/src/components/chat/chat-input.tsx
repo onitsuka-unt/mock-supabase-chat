@@ -10,8 +10,12 @@ export default function ChatInput() {
     setLoading(true);
 
     try {
+      // 環境に応じてAPIエンドポイントを動的に設定
+      const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
+      const apiUrl = apiBaseUrl ? `${apiBaseUrl}/api/messages` : '/api/messages';
+      
       // Hono API経由でメッセージを送信
-      const response = await fetch('/api/messages', {
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
