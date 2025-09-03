@@ -43,7 +43,7 @@ export default function MessageList({
   }
 
   return (
-    <div className='grid gap-y-4 py-4'>
+    <div className='space-y-4 py-4'>
       {messages.map((message) => (
         <div key={message.id} className='bg-gray-100 rounded-lg p-3'>
           <div className='flex items-center justify-between mb-2'>
