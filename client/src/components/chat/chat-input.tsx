@@ -10,10 +10,10 @@ export default function ChatInput() {
     setLoading(true);
 
     try {
-      // 環境に応じてAPIエンドポイントを動的に設定
+      setMessage('');
       const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
-      const apiUrl = apiBaseUrl ? `${apiBaseUrl}/api/messages` : '/api/messages';
-      
+      const apiUrl = apiBaseUrl ? `${apiBaseUrl}/api/chat` : '/api/chat';
+
       // Hono API経由でメッセージを送信
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -21,7 +21,7 @@ export default function ChatInput() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          content: message.trim(),
+          message: message.trim(),
         }),
       });
 
@@ -29,11 +29,11 @@ export default function ChatInput() {
         const errorData = await response.json();
         throw new Error(errorData.error || 'メッセージの送信に失敗しました');
       }
-
-      setMessage('');
     } catch (err) {
       console.error('メッセージ送信エラー:', err);
-      alert(err instanceof Error ? err.message : 'メッセージの送信に失敗しました');
+      alert(
+        err instanceof Error ? err.message : 'メッセージの送信に失敗しました'
+      );
     } finally {
       setLoading(false);
     }

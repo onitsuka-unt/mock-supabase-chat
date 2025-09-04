@@ -15,7 +15,6 @@ export function useMessages() {
           .from('messages')
           .select('*')
           .order('created_at', { ascending: true });
-
         if (error) throw error;
         setMessages(data || []);
       } catch (err) {
@@ -26,10 +25,9 @@ export function useMessages() {
         setLoading(false);
       }
     };
-
     fetchMessages();
-
-    // リアルタイム購読
+    
+    // PostgresChangesを利用してクライアント⇄データベースをリアルタイム同期
     const channel = supabase
       .channel('messages')
       .on(
@@ -45,7 +43,6 @@ export function useMessages() {
         }
       )
       .subscribe();
-
     return () => {
       supabase.removeChannel(channel);
     };
