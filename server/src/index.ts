@@ -23,10 +23,9 @@ app.use(
 // 環境変数の検証とクライアント初期化を関数化
 const initializeServices = (c: any) => {
   // Cloudflare Workers環境では c.env から、開発環境では process.env から取得
-  const supabaseUrl = c.env?.SUPABASE_URL || process.env.SUPABASE_URL;
-  const supabaseKey =
-    c.env?.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const geminiApiKey = c.env?.GOOGLE_API_KEY || process.env.GOOGLE_API_KEY;
+  const supabaseUrl = c.env?.SUPABASE_URL;
+  const supabaseKey = c.env?.SUPABASE_SERVICE_ROLE_KEY;
+  const geminiApiKey = c.env?.GOOGLE_API_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
     throw new Error(
