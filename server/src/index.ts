@@ -33,12 +33,11 @@ if (!geminiApiKey) {
 const supabase = createClient(supabaseUrl, supabaseKey);
 const genAI = new GoogleGenAI({ apiKey: geminiApiKey });
 
-const getChatHistory = async (limit = 10) => {
+const getChatHistory = async () => {
   const { data, error } = await supabase
     .from('messages')
     .select('*')
-    .order('created_at', { ascending: true })
-    .limit(limit * 2);
+    .order('created_at', { ascending: true });
 
   if (error) {
     console.error('履歴取得エラー:', error);
@@ -79,7 +78,7 @@ app.post('/api/chat', async (c) => {
     }
 
     const savedUserMessage = await saveMessage(message, 'user');
-    const history = await getChatHistory(5);
+    const history = await getChatHistory();
     const chatHistory = history.map((msg) => ({
       role: msg.role === 'user' ? 'user' : 'model',
       parts: [{ text: msg.content }],
@@ -105,7 +104,10 @@ app.post('/api/chat', async (c) => {
                       3. 一文は適度な長さに収める（30-50文字程度）
                       4. 専門用語は分かりやすく説明する
                       5. 共感的で温かみのある表現を心がける
-                      6. 「です・ます」調で統一する`,
+                      6. 「です・ま」調で統一する
+                      7. あなたは複数ユーザーとの会話を理解できます。
+                        - ユーザー名を見て誰が発言したかを把握してください
+                        - 過去の会話の文脈を理解して応答してください`,
             },
           ],
         },

@@ -26,7 +26,7 @@ export function useMessages() {
       }
     };
     fetchMessages();
-    
+
     // PostgresChangesを利用してクライアント⇄データベースをリアルタイム同期
     const channel = supabase
       .channel('messages')

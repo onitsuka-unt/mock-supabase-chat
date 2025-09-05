@@ -18,6 +18,7 @@ export default function MessageList({
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
   if (loading) {
     return (
       <div className='flex items-center justify-center h-full'>
@@ -45,7 +46,12 @@ export default function MessageList({
   return (
     <div className='space-y-4 py-4'>
       {messages.map((message) => (
-        <div key={message.id} className='bg-gray-100 rounded-lg p-3'>
+        <div
+          key={message.id}
+          className={`${
+            message.role === 'user' ? 'bg-gray-100' : 'bg-blue-100'
+          } rounded-lg p-3`}
+        >
           <div className='flex items-center justify-between mb-2'>
             <span className='text-xs text-gray-500'>
               {new Date(message.created_at).toLocaleTimeString('ja-JP', {

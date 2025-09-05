@@ -9,7 +9,6 @@
   "vars": {
     "SUPABASE_SERVICE_ROLE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpweWxhdWJscnFhZ3NjdGpwcmVrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NjI3NDc5NCwiZXhwIjoyMDcxODUwNzk0fQ.ftP9MDxZVPoLk-MB220fB8S2BLjYpL8WX96ZzorbHLg",
     "SUPABASE_URL": "https://jpylaublrqagsctjprek.supabase.co",
-    "GOOGLE_API_KEY": "AIzaSyD2RfAw18cVwORYCk66uXu1c-lxrsz7PKo"
   },
   // "kv_namespaces": [
   //   {
