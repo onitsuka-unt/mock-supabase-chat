@@ -3,7 +3,13 @@ import { createClient } from '@supabase/supabase-js';
 import { cors } from 'hono/cors';
 import { GoogleGenAI } from '@google/genai';
 
-const app = new Hono();
+type Bindings = {
+  SUPABASE_URL: string;
+  SUPABASE_SERVICE_ROLE_KEY: string;
+  GOOGLE_API_KEY: string;
+};
+
+const app = new Hono<{ Bindings: Bindings }>();
 
 app.use(
   '/api/*',
@@ -14,26 +20,32 @@ app.use(
   })
 );
 
-// 環境変数の検証
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const geminiApiKey = process.env.GOOGLE_API_KEY;
+// 環境変数の検証とクライアント初期化を関数化
+const initializeServices = (c: any) => {
+  // Cloudflare Workers環境では c.env から、開発環境では process.env から取得
+  const supabaseUrl = c.env?.SUPABASE_URL || process.env.SUPABASE_URL;
+  const supabaseKey =
+    c.env?.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const geminiApiKey = c.env?.GOOGLE_API_KEY || process.env.GOOGLE_API_KEY;
 
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error(
-    'Supabase環境変数が設定されていません: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY'
-  );
-}
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error(
+      'Supabase環境変数が設定されていません: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY'
+    );
+  }
 
-if (!geminiApiKey) {
-  throw new Error('Google API Key が設定されていません: GOOGLE_API_KEY');
-}
+  if (!geminiApiKey) {
+    throw new Error('Google API Key が設定されていません: GOOGLE_API_KEY');
+  }
 
-// クライアント初期化
-const supabase = createClient(supabaseUrl, supabaseKey);
-const genAI = new GoogleGenAI({ apiKey: geminiApiKey });
+  // クライアント初期化
+  const supabase = createClient(supabaseUrl, supabaseKey);
+  const genAI = new GoogleGenAI({ apiKey: geminiApiKey });
 
-const getChatHistory = async () => {
+  return { supabase, genAI };
+};
+
+const getChatHistory = async (supabase: any) => {
   const { data, error } = await supabase
     .from('messages')
     .select('*')
@@ -47,7 +59,11 @@ const getChatHistory = async () => {
   return data || [];
 };
 
-const saveMessage = async (content: string, role: 'user' | 'assistant') => {
+const saveMessage = async (
+  supabase: any,
+  content: string,
+  role: 'user' | 'assistant'
+) => {
   const messageData = {
     content: content.trim(),
     role,
@@ -71,18 +87,22 @@ const saveMessage = async (content: string, role: 'user' | 'assistant') => {
 // 統合チャットAPI - クライアントからテキスト受信→AI生成→DB保存まで一括処理
 app.post('/api/chat', async (c) => {
   try {
+    // 各リクエストでサービスを初期化
+    const { supabase, genAI } = initializeServices(c);
+
     const { message } = await c.req.json();
 
     if (!message || typeof message !== 'string') {
       return c.json({ error: 'メッセージが必要です' }, 400);
     }
 
-    const savedUserMessage = await saveMessage(message, 'user');
-    const history = await getChatHistory();
-    const chatHistory = history.map((msg) => ({
+    const savedUserMessage = await saveMessage(supabase, message, 'user');
+    const history = await getChatHistory(supabase);
+    const chatHistory = history.map((msg: any) => ({
       role: msg.role === 'user' ? 'user' : 'model',
       parts: [{ text: msg.content }],
     }));
+
     const response = await genAI.models.generateContent({
       model: 'gemini-2.5-flash',
       contents: [
@@ -120,7 +140,7 @@ app.post('/api/chat', async (c) => {
     });
 
     const aiResponse = response.text || 'AIからの応答を生成できませんでした。';
-    const savedAiMessage = await saveMessage(aiResponse, 'assistant');
+    const savedAiMessage = await saveMessage(supabase, aiResponse, 'assistant');
 
     return c.json({
       success: true,
